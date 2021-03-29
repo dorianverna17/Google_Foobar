@@ -1,0 +1,306 @@
+package Challenge6;
+
+import java.util.Arrays;
+
+public class Solution {
+    // matrices for LU factorization
+    public static Fraction[][] L, U;
+
+    public static class Fraction {
+        int numerator;
+        int denominator;
+
+        public Fraction(int numerator, int denominator) {
+            this.numerator = numerator;
+            this.denominator = denominator;
+        }
+
+        public Fraction() {
+            numerator = 0;
+            denominator = 0;
+        }
+
+        public Fraction multiply(Fraction fraction) {
+            Fraction f = new Fraction(fraction.numerator * numerator,
+                    fraction.denominator * denominator);
+            f = f.simplify();
+            return f;
+        }
+
+        public int getNumerator() {
+            return numerator;
+        }
+
+        public void setNumerator(int numerator) {
+            this.numerator = numerator;
+        }
+
+        public int getDenominator() {
+            return denominator;
+        }
+
+        public void setDenominator(int denominator) {
+            this.denominator = denominator;
+        }
+
+        public Fraction add(Fraction fraction) {
+            int n, d;
+            if (fraction.denominator != denominator) {
+                d = fraction.denominator * denominator;
+                n = fraction.denominator * numerator +
+                        denominator * fraction.numerator;
+            } else {
+                n = fraction.numerator + numerator;
+                d = denominator;
+            }
+            Fraction f = new Fraction(n ,d);
+            f = f.simplify();
+            return f;
+        }
+
+        public Fraction substract(Fraction fraction) {
+            int n, d;
+            if (fraction.denominator != denominator) {
+                d = fraction.denominator * denominator;
+                n = fraction.denominator * numerator +
+                        denominator * (-1) * fraction.numerator;
+            } else {
+                n = (-1) * fraction.numerator + numerator;
+                d = denominator;
+            }
+            Fraction f = new Fraction(n ,d);
+            f = f.simplify();
+            return f;
+        }
+
+        public Fraction divide(Fraction fraction) {
+            Fraction f;
+            int n, d;
+            n = numerator * fraction.denominator;
+            d = denominator * fraction.numerator;
+            f = new Fraction(n, d);
+            f = f.simplify();
+            return f;
+        }
+
+        public Fraction simplify() {
+            int s = cmmdc(numerator, denominator);
+            if (s != 1 && s != 0) {
+                numerator = numerator / s;
+                denominator = denominator / s;
+            }
+            return this;
+        }
+
+        public String toString() {
+            return numerator + "/" + denominator;
+        }
+
+        public Fraction amplify(int nr) {
+            numerator *= nr;
+            denominator *= nr;
+            return this;
+        }
+    }
+
+    public static int cmmdc(int a, int b) {
+        int r;
+        while (b != 0) {
+            r = a % b;
+            a = b;
+            b = r;
+        }
+        return a;
+    }
+
+    public static void print(Fraction[][] f) {
+        for (int i = 0; i < f.length; i++) {
+            for (int j = 0; j < f[i].length; j++) {
+                System.out.print(f[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        int[][] m = new int[][] {
+                                {0, 1, 0, 0, 0, 1},
+                                {4, 0, 0, 3, 2, 0},
+                                {0, 0, 0, 0, 0, 0},
+                                {0, 0, 0, 0, 0, 0},
+                                {0, 0, 0, 0, 0, 0},
+                                {0, 0, 0, 0, 0, 0}
+                                };
+        m = new int[][] {
+                {0, 1, 0, 0, 1},
+                {0, 0, 0, 3, 4},
+                {0, 2, 1, 0, 0},
+                {0, 0, 0, 0, 1},
+                {0, 0, 0, 0, 0}
+        };
+        System.out.println(Arrays.toString(solution(m)));
+    }
+
+    private static int countTerminals(int[][] m) {
+        int ok, count = 0;
+        for (int i = 0; i < m.length; i++) {
+            ok = 0;
+            for (int j = 0; j < m[i].length; j++) {
+                if (m[i][j] != 0)
+                    ok = 1;
+            }
+            if (ok == 0)
+                count++;
+        }
+        return count;
+    }
+
+    public static Fraction[][] makeProbabilitiesMatrix(int[][] m) {
+        for (int i = 0; i < m.length; i++) {
+            m[i][i] = 0;
+        }
+        Fraction[][] matrix = new Fraction[m.length][m[0].length];
+        int count;
+        for (int i = 0; i < m.length; i++) {
+            count = 0;
+            for (int j = 0; j < m[i].length; j++) {
+                if (m[i][j] != 0)
+                    count += m[i][j];
+            }
+            if (count != 0) {
+                for (int j = 0; j < m.length; j++) {
+                    matrix[i][j] = new Fraction(m[i][j], count);
+                }
+            } else {
+                for (int j = 0; j < m.length; j++) {
+                    matrix[i][j] = new Fraction(0, 1);
+                }
+            }
+        }
+        return matrix;
+    }
+
+    public static Fraction[][] transpose(Fraction[][] matrix) {
+        Fraction[][] result = new Fraction[matrix[0].length][matrix.length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                result[j][i] = matrix[i][j];
+            }
+        }
+        return result;
+    }
+
+    // Crout factorization
+    public static void factorization(Fraction[][] matrix) {
+        L = new Fraction[matrix.length][matrix[0].length];
+        U = new Fraction[matrix.length][matrix[0].length];
+        for (int i = 0; i < L.length; i++) {
+            for (int j = 0; j < L[0].length; j++) {
+                L[i][j] = new Fraction(0, 1);
+            }
+        }
+        for (int i = 0; i < U.length; i++) {
+            for (int j = 0; j < U[0].length; j++) {
+                if (i != j)
+                    U[i][j] = new Fraction(0, 1);
+                else
+                    U[i][j] = new Fraction(1,1);
+            }
+        }
+        for (int i = 0; i < L.length; i++) {
+            L[i][0] = matrix[i][0];
+        }
+        Fraction s;
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = i; j < matrix.length; j++) {
+                s = new Fraction(0, 1);
+                for (int k = 0; k <= i - 1; k++) {
+                    s = s.add(L[j][k].multiply(U[k][i]));
+                }
+                L[j][i] = matrix[j][i].substract(s);
+            }
+            for (int j = i + 1; j < matrix.length; j++) {
+                s = new Fraction(0, 1);
+                for (int k = 0; k <= i - 1; k++) {
+                    s = s.add(L[i][k].multiply(U[k][j]));
+                }
+                U[i][j] = matrix[i][j].substract(s).divide(L[i][i]);
+            }
+        }
+    }
+
+    public static Fraction[] SIT(Fraction[][] A, Fraction[] b) {
+        Fraction[] result = new Fraction[A.length];
+        result[0] = b[0].divide(A[0][0]);
+        Fraction s;
+        for (int i = 0; i < A.length; i++) {
+            s = new Fraction(0, 1);
+            for (int j = 0; j <= i - 1; j++) {
+                s = s.add(A[i][j].multiply(result[j]));
+            }
+            result[i] = b[i].substract(s).divide(A[i][i]);
+        }
+        return result;
+    }
+
+    public static Fraction[] SST(Fraction[][] A, Fraction[] b) {
+        Fraction[] result = new Fraction[A.length];
+        int n = A.length - 1;
+        result[n] = b[n].divide(A[n][n]);
+        Fraction s;
+        for (int i = n - 1; i >= 0; i--) {
+            s = new Fraction(0, 1);
+            for (int j = i + 1; j < n + 1; j++) {
+                s = s.add(A[i][j].multiply(result[j]));
+            }
+            result[i] = b[i].substract(s).divide(A[i][i]);
+        }
+        return result;
+    }
+
+    public static int[] solution(int[][] m) {
+        int terminal = countTerminals(m);
+        if (terminal == 0)
+            return new int[0];
+        Fraction[][] matrix = makeProbabilitiesMatrix(m);
+        // now I compute I - A where I is the identity matrix and A is the transition matrix (stochastic)
+        Fraction zero = new Fraction(0, 1);
+        Fraction one = new Fraction(1, 1);
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                matrix[i][j] = zero.substract(matrix[i][j]);
+                if (i == j)
+                    matrix[i][j] = one.add(matrix[i][j]);
+            }
+        }
+        // now I transpose the previous result
+        matrix = transpose(matrix);
+        // now I have to make the LU factorization of this matrix
+        factorization(matrix);
+        Fraction[] b = new Fraction[matrix.length];
+        for (int i = 0; i < b.length; i++) {
+            b[i] = new Fraction(0, 1);
+        }
+        b[0] = new Fraction(1,1);
+        // Inferior triangular system
+        Fraction[] w = SIT(L, b);
+        Fraction[] result_aux = SST(U, w);
+        int[] result = new int[terminal + 1];
+        int cmmmc = 0;
+        for (int i = matrix.length - terminal; i < matrix.length; i++) {
+            if (i > matrix.length - terminal)
+                cmmmc = cmmmc * result_aux[i].denominator / cmmdc(cmmmc, result_aux[i].denominator);
+            else
+                cmmmc = result_aux[i].denominator;
+        }
+        int pos;
+        for (int i = 0; i < terminal; i++) {
+            pos = i + matrix.length - terminal;
+            result_aux[pos] = result_aux[pos].amplify(cmmmc / result_aux[pos].denominator);
+            result[i] = result_aux[pos].numerator;
+        }
+        result[terminal] = cmmmc;
+        return result;
+    }
+}

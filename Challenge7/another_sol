@@ -1,0 +1,266 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
+public class Solution {
+    public static boolean listContains(ArrayList<int[]> list, int[] point) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i)[0] == point[0] && list.get(i)[1] == point[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void printPoint(int[] point) {
+        System.out.print("[" + point[0] + " " + point[1] + "] ");
+    }
+
+    // functie care verifica daca punctele sunt pe aceeasi directie (acelasi sens)
+    public static boolean checkPoints(int[] point1, int[] point3, int[] your_position) {
+        double dist1 = computeDistance(point1, your_position);
+        double dist2 = computeDistance(point1, point3);
+        double dist3 = computeDistance(your_position, point3);
+        double max = Math.max(dist2, dist1);
+        max = Math.max(max, dist3);
+        if (max == dist3) {
+            if (Math.abs(max - dist1 - dist2) < 0.01) {
+                return true;
+            }
+        }
+        if (max == dist2) {
+            if (Math.abs(max - dist1 - dist3) < 0.01) {
+                return false;
+            }
+        }
+        if (max == dist1) {
+            if (Math.abs(max - dist3 - dist2) < 0.01) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // functie care verifica daca trei puncte sunt pe aceeasi linie
+    public static boolean onTheSameLine(int[] point1, int[] point3, int[] your_position) {
+        double dist1 = computeDistance(point1, your_position);
+        double dist2 = computeDistance(point1, point3);
+        double dist3 = computeDistance(your_position, point3);
+        double max = Math.max(dist2, dist1);
+        max = Math.max(max, dist3);
+        int ok = 0;
+        if (Math.abs(max - dist3) < 0.001) {
+            if (Math.abs(max - dist1 - dist2) < 0.001)
+                ok = 1;
+        }
+        if (Math.abs(max - dist2) < 0.001) {
+            if (Math.abs(max - dist1 - dist3) < 0.001)
+                ok = 1;
+        }
+        if (Math.abs(max - dist1) < 0.001) {
+            if (Math.abs(max - dist3 - dist2) < 0.001)
+                ok = 1;
+        }
+        if (ok == 1)
+            return true;
+        return false;
+    }
+
+    // functie care verifica daca se trage in directia colturilor camerei
+    public static boolean checkCorner(int[] point, int[] your_position, int[] dimensions, int[] trainer_position) {
+        // first corner
+        int[] first = new int[] {dimensions[0], dimensions[1]};
+        if (onTheSameLine(point, your_position, first))
+            if (point[0] >= your_position[0] && point[1] >= your_position[1] &&
+                    !onTheSameLine(your_position, trainer_position, point))
+                return true;
+        // second corner
+        int[] second = new int[] {dimensions[0], 0};
+        if (onTheSameLine(point, your_position, second))
+            if (point[0] >= your_position[0] && point[1] <= your_position[1] &&
+                    !onTheSameLine(your_position, trainer_position, point))
+                return true;
+        // third corner
+        int[] third = new int[] {0, 0};
+        if (onTheSameLine(point, your_position, third))
+            if (point[0] <= your_position[0] && point[1] <= your_position[1] &&
+                    !onTheSameLine(your_position, trainer_position, point))
+                return true;
+        // fourth corner
+        int[] fourth = new int[] {0, dimensions[1]};
+        if (onTheSameLine(point, your_position, fourth))
+            if (point[0] <= your_position[0] && point[1] >= your_position[1] &&
+                    !onTheSameLine(your_position, trainer_position, point))
+                return true;
+        return false;
+    }
+
+    // functie care calculeaza distanta dintre 2 puncte
+    private static double computeDistance(int[] your_position, int[] image) {
+        return Math.sqrt(Math.pow(image[0] - your_position[0], 2) +
+                Math.pow(image[1] - your_position[1], 2));
+    }
+
+    public static ArrayList<int[]> computeFirstQuadrantPositions(int[] your_position, int distance,
+                                                          int[] dimensions, int[] trainer_position) {
+        ArrayList<int[]> list = new ArrayList<>();
+        int max_x = your_position[0] + distance;
+        int max_y = your_position[1] + distance;
+        double times_x = Math.ceil((double)max_x / dimensions[0]);
+        double times_y = Math.ceil((double)max_y / dimensions[1]);
+        list.add(trainer_position);
+        int[] new_int = new int[] {trainer_position[0], trainer_position[1]};
+        for (int i = 0; i < times_x; i++) {
+            if (i != 0) {
+                new_int = new int[]{new_int[0] + (i * dimensions[0] - new_int[0]) * 2,
+                        list.get(0)[1]};
+                if (computeDistance(your_position, new_int) <= distance)
+                    list.add(new_int);
+            }
+            for (int j = 1; j < times_y; j++) {
+                new_int = new int[] {new_int[0], new_int[1] + (j * dimensions[1] -
+                        new_int[1]) * 2};
+                if (computeDistance(your_position, new_int) <= distance)
+                    list.add(new_int);
+            }
+        }
+        return list;
+    }
+
+    public static ArrayList<int[]> computeSecondQuadrantPositions(ArrayList<int[]> list, int[] your_position, int distance) {
+        ArrayList<int[]> result = new ArrayList<>();
+        int[] new_int;
+        for (int[] ints : list) {
+            new_int = new int[]{-ints[0], ints[1]};
+            if (computeDistance(your_position, new_int) <= distance)
+                result.add(new_int);
+        }
+        return result;
+    }
+
+    public static ArrayList<int[]> computeThirdQuadrantPositions(ArrayList<int[]> list, int[] your_position, int distance) {
+        ArrayList<int[]> result = new ArrayList<>();
+        int[] new_int;
+        for (int[] ints : list) {
+            new_int = new int[]{-ints[0], -ints[1]};
+            if (computeDistance(your_position, new_int) <= distance)
+                result.add(new_int);
+        }
+        return result;
+    }
+
+    public static ArrayList<int[]> computeFourthQuadrantPositions(ArrayList<int[]> list, int[] your_position, int distance) {
+        ArrayList<int[]> result = new ArrayList<>();
+        int[] new_int;
+        for (int[] ints : list) {
+            new_int = new int[]{ints[0], -ints[1]};
+            if (computeDistance(your_position, new_int) <= distance)
+                result.add(new_int);
+        }
+        return result;
+    }
+
+    public static ArrayList<int[]> computeSafetyArray(int[] your_position, int[] dimensions, int distance) {
+        ArrayList<int[]> result = computeFirstQuadrantPositions(your_position, distance, dimensions, your_position);
+        ArrayList<int[]> result2 = computeSecondQuadrantPositions(result, your_position, distance);
+        ArrayList<int[]> result3 = computeThirdQuadrantPositions(result, your_position, distance);
+        ArrayList<int[]> result4 = computeFourthQuadrantPositions(result, your_position, distance);
+        result.addAll(result2);
+        result.addAll(result3);
+        result.addAll(result4);
+        return result;
+    }
+
+    public static int solution(int[] dimensions, int[] your_position, int[] trainer_position, int distance) {
+        ArrayList<int[]> firstQuadrant = computeFirstQuadrantPositions(your_position, distance,
+                dimensions, trainer_position);
+        ArrayList<int[]> secondQuadrant = computeSecondQuadrantPositions(firstQuadrant, your_position, distance);
+        ArrayList<int[]> thirdQuadrant = computeThirdQuadrantPositions(firstQuadrant, your_position, distance);
+        ArrayList<int[]> fourthQuadrant = computeFourthQuadrantPositions(firstQuadrant, your_position, distance);
+        firstQuadrant.addAll(secondQuadrant);
+        firstQuadrant.addAll(thirdQuadrant);
+        firstQuadrant.addAll(fourthQuadrant);
+        for (int i = 0; i < firstQuadrant.size(); i++) {
+            if (checkCorner(firstQuadrant.get(i), your_position, dimensions, trainer_position)) {
+                firstQuadrant.remove(i);
+                i--;
+            }
+        }
+//        System.out.println("no");
+        HashMap<Double, int[]> set = new HashMap<>();
+        for (int i = 0; i < firstQuadrant.size(); i++) {
+            if (!set.containsKey(Math.atan2(firstQuadrant.get(i)[1] - your_position[1], firstQuadrant.get(i)[0] - your_position[0])))
+                set.put(Math.atan2(firstQuadrant.get(i)[1] - your_position[1], firstQuadrant.get(i)[0] - your_position[0]), firstQuadrant.get(i));
+            else {
+                firstQuadrant.remove(i);
+                i--;
+            }
+        }
+//        System.out.println("da");
+        ArrayList<int[]> safetyArray = computeSafetyArray(your_position, dimensions, distance);
+        for (int i = 1; i < safetyArray.size(); i++) {
+            if (set.containsKey(Math.atan2(safetyArray.get(i)[1] - your_position[1], safetyArray.get(i)[0] - your_position[0])) &&
+                    computeDistance(safetyArray.get(i), your_position) <=
+                        computeDistance(set.get(Math.atan2(safetyArray.get(i)[1] - your_position[1], safetyArray.get(i)[0] - your_position[0])), your_position)) {
+                firstQuadrant.remove(set.get(Math.atan2(safetyArray.get(i)[1] - your_position[1], safetyArray.get(i)[0] - your_position[0])));
+            }
+        }
+//        System.out.println(firstQuadrant.size());
+        return firstQuadrant.size();
+    }
+
+    // public static void main(String[] args) {
+    //     int[] dimensions, your_position, trainer_position;
+    //     int distance, nr;
+
+    //     // Test 1
+    //     dimensions = new int[] {3, 2};
+    //     your_position = new int[] {1, 1};
+    //     trainer_position = new int[] {2, 1};
+    //     distance = 4;
+
+    //     nr = solution(dimensions, your_position, trainer_position, distance);
+    //     if (nr == 7)
+    //         System.out.println("Test 1 passed");
+
+    //     // Test 2
+    //     dimensions = new int[] {23, 10};
+    //     your_position = new int[] {6, 4};
+    //     trainer_position = new int[] {3, 2};
+    //     distance = 23;
+
+    //     nr = solution(dimensions, your_position, trainer_position, distance);
+    //     if (nr == 8)
+    //         System.out.println("Test 2 passed");
+
+    //     // Test 3
+    //     dimensions = new int[] {2, 5};
+    //     your_position = new int[] {1, 2};
+    //     trainer_position = new int[] {1, 4};
+    //     distance = 11;
+
+    //     nr = solution(dimensions, your_position, trainer_position, distance);
+    //     if (nr == 27)
+    //         System.out.println("Test 3 passed");
+
+    //     //Test 4
+    //     dimensions = new int[] {300, 275};
+    //     your_position = new int[] {150, 150};
+    //     trainer_position = new int[] {185, 100};
+    //     distance = 500;
+
+    //     nr = solution(dimensions, your_position, trainer_position, distance);
+    //     if (nr == 9)
+    //         System.out.println("Test 4 passed");
+
+    //     // Test 5
+    //     dimensions = new int[] {10, 10};
+    //     your_position = new int[] {4, 4};
+    //     trainer_position = new int[] {3, 3};
+    //     distance = 5000;
+
+    //     nr = solution(dimensions, your_position, trainer_position, distance);
+    //     if (nr == 739323)
+    //         System.out.println("Test 5 passed");
+    // }
+}

@@ -1,0 +1,117 @@
+//
+//    private static void modifyMarkovMatrix(int[][] m, int terminal) {
+//        for (int i = m.length - terminal; i < m.length; i++) {
+//            m[i][i] = 1;
+//        }
+//    }
+//
+//
+//    public static int[] solution(int[][] m) {
+//        int terminal = countTerminals(m);
+//        modifyMarkovMatrix(m, terminal);
+//        Fraction[][] transition_matrix = makeProbabilitiesMatrix(m);
+//        Fraction[][] new_matrix = new Fraction[m.length][m.length];
+//        for (int i = 0; i < 1; i++) {
+//            if (i == 0)
+//                new_matrix = multiplyMatrix(transition_matrix, transition_matrix);
+//            else
+//                new_matrix = multiplyMatrix(new_matrix, transition_matrix);
+//        }
+//        Fraction[] result_frac = new Fraction[terminal + 1];
+//        int[] result = new int[terminal + 1];
+//        int cmmmc = 0;
+//        for (int i = 0; i < terminal; i++) {
+//            result_frac[i] = new_matrix[0][new_matrix.length - terminal + i];
+//            if (i > 0)
+//                cmmmc = cmmmc * result_frac[i].denominator / cmmdc(cmmmc, result_frac[i].denominator);
+//            else
+//                cmmmc = result_frac[i].denominator;
+//        }
+//        for (int i = 0; i < terminal; i++) {
+//            result_frac[i] = result_frac[i].amplify(cmmmc / result_frac[i].denominator);
+//            result[i] = result_frac[i].numerator;
+//        }
+//        result[terminal] = cmmmc;
+//        return result;
+//    }
+//
+//    public static Fraction[][] makeProbabilitiesMatrix(int[][] m) {
+//        Fraction[][] matrix = new Fraction[m.length][m[0].length];
+//        int count;
+//        for (int i = 0; i < m.length; i++) {
+//            count = 0;
+//            for (int j = 0; j < m[i].length; j++) {
+//                if (m[i][j] != 0)
+//                    count += m[i][j];
+//            }
+//            if (count != 0) {
+//                for (int j = 0; j < m.length; j++) {
+//                    matrix[i][j] = new Fraction(m[i][j], count);
+//                }
+//            } else {
+//                for (int j = 0; j < m.length; j++) {
+//                    matrix[i][j] = new Fraction(0, count);
+//                }
+//            }
+//        }
+//        print(matrix);
+//        Fraction f, diff;
+//        Fraction one = new Fraction(1, 1);
+//        Fraction upper, lower;
+//        for (int i = 1; i < m.length; i++) {
+//            for (int j = 0; j < i; j++) {
+//                if (m[i][j] != 0) {
+//                    f = matrix[i][j];
+//                    System.out.println(f);
+//                    matrix[i][j] = new Fraction(0, 1);
+//                    reformatLine(matrix, i);
+//                    print(matrix);
+//                    for (int k = 0; k < i; k++) {
+//                        if (matrix[k][i].numerator != 0) {
+//                            lower = one.substract(matrix[k][i]);
+//                            diff = matrix[k][i].multiply(f);
+//                            matrix[k][i] = matrix[k][i].substract(diff);
+//                            matrix[k][i] = matrix[k][i].divide(one.substract(diff));
+//                            upper = one.substract(matrix[k][i]);
+//                            if (lower.numerator != 0) {
+//                                for (int l = 0; l < matrix.length; l++) {
+//                                    if (matrix[k][l] != matrix[k][i]) {
+//                                        System.out.println(matrix[k][l] + " " + upper + " " + lower);
+//                                        matrix[k][l] = matrix[k][l].multiply(upper).divide(lower);
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        print(matrix);
+//        return matrix;
+//    }
+//
+//    public static void reformatLine(Fraction[][] matrix, int k) {
+//        int count = 0;
+//        for (int i = 0; i < matrix.length; i++) {
+//            if (matrix[k][i].numerator != 0)
+//                count += matrix[k][i].numerator;
+//        }
+//        for (int i = 0; i < matrix.length; i++) {
+//            matrix[k][i].denominator = count;
+//        }
+//    }
+//
+//    public static Fraction[][] multiplyMatrix(Fraction[][] f1, Fraction[][] f2) {
+//        Fraction[][] new_matrix = new Fraction[f1.length][f1[0].length];
+//        Fraction result;
+//        for (int i = 0; i < f1.length; i++) {
+//            for (int j = 0; j < f2[0].length; j++) {
+//                result = new Fraction(0, 1);
+//                for (int k = 0; k < f2.length; k++)
+//                    result = result.add(f1[i][k].multiply(f2[k][j]));
+//                new_matrix[i][j] = result;
+//            }
+//        }
+//        return new_matrix;
+//    }
+//

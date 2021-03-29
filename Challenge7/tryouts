@@ -1,0 +1,166 @@
+//    private static boolean checkSafety(int[] your_position, int[] trainer_position, int[] point) {
+//        double dist1 = computeDistance(point, your_position);
+//        double dist2 = computeDistance(point, trainer_position);
+//        double dist3 = computeDistance(your_position, trainer_position);
+//        double max = Math.max(dist2, dist1);
+//        max = Math.max(max, dist3);
+//        if (max == dist2) {
+//            if (Math.abs(max - dist1 - dist3) == 0)
+//                return true;
+//        }
+//        return false;
+//    }
+
+//        if (ok == 1) {
+//            if (point1[1] - point3[1] != 0 && point1[0] - point3[0] != 0) {
+//                if ((point1[0] < your_position[0] && point3[0] > your_position[0] &&
+//                        point1[1] < your_position[1] && point3[1] > your_position[1]) ||
+//                        (point3[0] < your_position[0] && point1[0] > your_position[0] &&
+//                                point3[1] < your_position[1] && point1[1] > your_position[1]))
+//                    return false;
+//                if ((point1[0] < your_position[0] && point3[0] > your_position[0] &&
+//                        point1[1] > your_position[1] && point3[1] < your_position[1]) ||
+//                        (point3[0] < your_position[0] && point1[0] > your_position[0] &&
+//                                point3[1] > your_position[1] && point1[1] < your_position[1]))
+//                    return false;
+//                return true;
+//            }
+//            if (point1[1] - point3[1] == 0) {
+//                if ((point1[0] < your_position[0] && point3[0] > your_position[0]) ||
+//                    (point3[0] < your_position[0] && point1[0] > your_position[0]))
+//                    return false;
+//                else
+//                    return true;
+//            }
+//            if (point1[0] - point3[0] == 0) {
+//                if ((point1[1] < your_position[1] && point3[1] > your_position[1]) ||
+//                        (point3[1] < your_position[1] && point1[1] > your_position[1]))
+//                    return false;
+//                else
+//                    return true;
+//            }
+//
+//        }
+
+    private static void calculateImages(int[] dimensions, int[] your_position, int[] image, int distance,
+                                        int[] trainer_position) {
+        int dist;
+        double auxiliary_distance;
+        if (list.contains(image))
+            return;
+        else
+            list.add(image);
+        auxiliary_distance = computeDistance(your_position, image);
+        if (auxiliary_distance > distance || auxiliary_distance < 0.01)
+            return;
+        aux.add(image);
+        // relative to the first wall
+        int[] north = new int[2];
+        dist = dimensions[1] - image[1];
+        north[0] = image[0];
+        north[1] = image[1] + 2 * dist;
+        auxiliary_distance = computeDistance(your_position, north);
+        if ((!list.contains(north)) && !(auxiliary_distance > distance || auxiliary_distance < 0.01)) {
+//            list.add(north);
+            calculateImages(dimensions, your_position, north, distance, trainer_position);
+        }
+        // relative to the south wall
+        int[] south = new int[2];
+        dist = image[1];
+        south[0] = image[0];
+        south[1] = image[1] - 2 * dist;
+        auxiliary_distance = computeDistance(your_position, south);
+        if ((!list.contains(south)) && !(auxiliary_distance > distance || auxiliary_distance < 0.01)) {
+//            list.add(south);
+            calculateImages(dimensions, your_position, south, distance, trainer_position);
+        }
+        // relative to the left wall
+        int[] west = new int[2];
+        dist = image[0];
+        west[0] = image[0] - 2 * dist;
+        west[1] = image[1];
+        auxiliary_distance = computeDistance(your_position, west);
+        if ((!list.contains(west)) && !(auxiliary_distance > distance || auxiliary_distance < 0.01)) {
+//            list.add(west);
+            calculateImages(dimensions, your_position, west, distance, trainer_position);
+        }
+        // relative to the right wall
+        int[] east = new int[2];
+        dist = dimensions[0] - image[0];
+        east[0] = image[0] + 2 * dist;
+        east[1] = image[1];
+        auxiliary_distance = computeDistance(your_position, east);
+        if ((!list.contains(east)) && !(auxiliary_distance > distance || auxiliary_distance < 0.01)) {
+//            list.add(north);
+            calculateImages(dimensions, your_position, east, distance, trainer_position);
+        }
+    }
+
+
+    private static void calculateImagesSafely(int[] dimensions, int[] your_position, int[] image, int distance,
+                                        int[] trainer_position) {
+        int dist;
+        double auxiliary_distance;
+        if (list2.contains(image))
+            return;
+        else
+            list2.add(image);
+        if (image[0] != your_position[0] || image[1] != your_position[1]) {
+            auxiliary_distance = computeDistance(your_position, image);
+            if (auxiliary_distance > distance || auxiliary_distance < 0.01)
+                return;
+        }
+        list_safety.add(image);
+        // relative to the first wall
+        int[] north = new int[2];
+        dist = dimensions[1] - image[1];
+        north[0] = image[0];
+        north[1] = image[1] + 2 * dist;
+        auxiliary_distance = computeDistance(your_position, north);
+        if ((!list2.contains(north))) {
+            if ((north[0] != your_position[0] || north[1] != your_position[1])) {
+                if (auxiliary_distance <= distance && auxiliary_distance > 0.01)
+                    calculateImagesSafely(dimensions, your_position, north, distance, trainer_position);
+            } else
+                calculateImagesSafely(dimensions, your_position, north, distance, trainer_position);
+        }
+        // relative to the south wall
+        int[] south = new int[2];
+        dist = image[1];
+        south[0] = image[0];
+        south[1] = image[1] - 2 * dist;
+        auxiliary_distance = computeDistance(your_position, south);
+        if ((!list2.contains(south))) {
+            if ((south[0] != your_position[0] || south[1] != your_position[1])) {
+                if (!(auxiliary_distance > distance || auxiliary_distance < 0.01))
+                    calculateImagesSafely(dimensions, your_position, south, distance, trainer_position);
+            } else
+                calculateImagesSafely(dimensions, your_position, south, distance, trainer_position);
+        }
+        // relative to the left wall
+        int[] west = new int[2];
+        dist = image[0];
+        west[0] = image[0] - 2 * dist;
+        west[1] = image[1];
+        auxiliary_distance = computeDistance(your_position, west);
+        if ((!list2.contains(west))) {
+            if ((west[0] != your_position[0] || west[1] != your_position[1])) {
+                if (!(auxiliary_distance > distance || auxiliary_distance < 0.01))
+                    calculateImagesSafely(dimensions, your_position, west, distance, trainer_position);
+            } else
+                calculateImagesSafely(dimensions, your_position, west, distance, trainer_position);
+        }
+        // relative to the right wall
+        int[] east = new int[2];
+        dist = dimensions[0] - image[0];
+        east[0] = image[0] + 2 * dist;
+        east[1] = image[1];
+        auxiliary_distance = computeDistance(your_position, east);
+        if ((!list2.contains(east))) {
+            if ((east[0] != your_position[0] || east[1] != your_position[1])) {
+                if (!(auxiliary_distance > distance || auxiliary_distance < 0.01))
+                    calculateImagesSafely(dimensions, your_position, east, distance, trainer_position);
+            } else
+                calculateImagesSafely(dimensions, your_position, east, distance, trainer_position);
+        }
+    }
