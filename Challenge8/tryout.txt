@@ -1,0 +1,45 @@
+
+    public static int blossom(ArrayList<ArrayList<Integer>> matrix) {
+        int matches = 0, node, size;
+        int max = getMaxList(matrix);
+        int checks = matrix.get(max).size();
+        int[] second_min = new int[2];
+        while (matrix.size() > 1 && checks >= 1) {
+            node = getMinList(matrix);
+            if (matrix.get(node).size() < 1)
+                matrix.remove(node);
+            else {
+                size = matrix.get(matrix.get(node).get(0)).size() + 1;
+                second_min[0] = size;
+                second_min[1] = 1;
+                for (int i = 0; i < matrix.get(node).size(); i++) {
+                    if (matrix.get(matrix.get(node).get(i)).size() < second_min[0]) {
+                        second_min[0] = matrix.get(matrix.get(node).get(i)).size();
+                        second_min[1] = matrix.get(node).get(i);
+                    }
+                    for (int check = 0; check < matrix.get(matrix.get(node).get(i)).size(); check++) {
+                        if (matrix.get(matrix.get(node).get(i)).get(check) == node) {
+                            matrix.get(matrix.get(node).get(i)).remove(check);
+                            break;
+                        }
+                    }
+                }
+                for (int i = 0; i < matrix.get(second_min[1]).size(); i++) {
+                    for (int check = 0; check < matrix.get(matrix.get(second_min[1]).get(i)).size(); check++) {
+                        if (matrix.get(matrix.get(second_min[1]).get(i)).get(check) == second_min[1]) {
+                            matrix.get(matrix.get(second_min[1]).get(i)).remove(check);
+                            break;
+                        }
+                    }
+                }
+                matrix.remove(node);
+                matrix.remove(second_min[1]);
+                matches += 2;
+                if (matrix.size() > 1) {
+                    max = getMaxList(matrix);
+                    checks = matrix.get(max).size();
+                }
+            }
+        }
+        return matches;
+    }
